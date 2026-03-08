@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.miguelmialdea.expensetracker.feature.filter.ui"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24

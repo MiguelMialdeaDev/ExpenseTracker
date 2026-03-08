@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.miguelmialdea.expensetracker.core.domain"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
