@@ -1,0 +1,40 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "com.miguelmialdea.expensetracker.feature.home.ui"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    implementation(project(":core:ui"))
+    implementation(project(":core:domain"))
+    implementation(project(":feature:home:domain"))
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material3)
+
+}
