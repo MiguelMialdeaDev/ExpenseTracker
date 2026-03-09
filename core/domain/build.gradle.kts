@@ -22,5 +22,5 @@ android {
 }
 
 dependencies {
-    // Solo Kotlin, sin dependencias de Android
+    implementation(libs.kotlinx.coroutines.core)
 }
