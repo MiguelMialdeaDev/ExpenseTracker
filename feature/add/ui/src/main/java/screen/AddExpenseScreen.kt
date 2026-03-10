@@ -1,0 +1,216 @@
+package screen
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import components.CategorySelector
+import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+@Suppress("LongMethod")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddExpenseScreen(
+    expenseId: Long? = null,
+    onNavigateBack: () -> Unit,
+    viewModel: AddExpenseViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Cargar gasto si es modo edición
+    LaunchedEffect(expenseId) {
+        viewModel.loadExpense(expenseId)
+    }
+
+    // Navegar atrás cuando se guarde
+    LaunchedEffect(uiState.isSaved) {
+        if (uiState.isSaved) {
+            onNavigateBack()
+        }
+    }
+
+    // Mostrar error si existe
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(if (uiState.isEditMode) "Edit Expense" else "Add Expense")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        if (uiState.isLoading && uiState.isEditMode) {
+            // Mostrar loading solo cuando está cargando para editar
+            CircularProgressIndicator(
+                modifier = Modifier.padding(paddingValues)
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Campo de monto
+                OutlinedTextField(
+                    value = uiState.amount,
+                    onValueChange = viewModel::onAmountChange,
+                    label = { Text("Amount") },
+                    placeholder = { Text("0.00") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                    isError = uiState.amountError != null,
+                    supportingText = {
+                        uiState.amountError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Selector de categoría
+                CategorySelector(
+                    selectedCategory = uiState.category,
+                    onCategorySelected = viewModel::onCategoryChange
+                )
+
+                // Campo de descripción
+                OutlinedTextField(
+                    value = uiState.description,
+                    onValueChange = viewModel::onDescriptionChange,
+                    label = { Text("Description (optional)") },
+                    placeholder = { Text("e.g., Lunch with friends") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+
+                // Date picker (simplificado por ahora)
+                DateSelector(
+                    selectedDate = uiState.date,
+                    onDateSelected = viewModel::onDateChange
+                )
+
+                // Botones
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.weight(1f),
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = viewModel::onSaveClick,
+                        modifier = Modifier.weight(1f),
+                        enabled = !uiState.isLoading
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
+                        Text(if (uiState.isEditMode) "Update" else "Save")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Suppress("UnusedParameter")
+@Composable
+private fun DateSelector(
+    selectedDate: LocalDateTime,
+    onDateSelected: (LocalDateTime) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Date",
+            style = MaterialTheme.typography.labelLarge
+        )
+
+        OutlinedButton(
+            onClick = { showDatePicker = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(formatDate(selectedDate))
+        }
+    }
+
+    // Por ahora usamos un botón simple
+    // En el futuro se puede integrar un DatePicker real
+    if (showDatePicker) {
+        LaunchedEffect(Unit) {
+            showDatePicker = false
+        }
+    }
+}
+
+private fun formatDate(date: LocalDateTime): String {
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    return date.format(formatter)
+}
