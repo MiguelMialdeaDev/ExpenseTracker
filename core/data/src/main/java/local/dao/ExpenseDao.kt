@@ -1,7 +1,6 @@
 package local.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -23,6 +22,6 @@ interface ExpenseDao {
     @Update
     suspend fun updateExpense(expense: ExpenseEntity)
 
-    @Delete
-    suspend fun deleteExpense(expense: ExpenseEntity)
+    @Query("DELETE FROM expenses WHERE id = :id")
+    suspend fun deleteExpense(id: Long)
 }
