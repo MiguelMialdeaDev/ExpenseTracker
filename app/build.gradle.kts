@@ -55,6 +55,9 @@ dependencies {
     // Desugaring
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 
+    // Nav
+    implementation(libs.androidx.navigation.compose)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

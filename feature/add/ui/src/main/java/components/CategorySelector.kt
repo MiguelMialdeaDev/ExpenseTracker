@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -20,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import models.CategoryModel
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CategorySelector(
     selectedCategory: CategoryModel,
@@ -36,36 +34,110 @@ fun CategorySelector(
             style = MaterialTheme.typography.labelLarge
         )
 
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        // Primera fila (FOOD, TRANSPORT, ENTERTAINMENT, SHOPPING)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CategoryModel.entries.forEach { category ->
-                FilterChip(
-                    selected = selectedCategory == category,
-                    onClick = { onCategorySelected(category) },
-                    label = { Text(category.name) },
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(category.color.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = category.emoji,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-                )
-            }
+            CategoryChip(
+                category = CategoryModel.FOOD,
+                isSelected = selectedCategory == CategoryModel.FOOD,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+            CategoryChip(
+                category = CategoryModel.TRANSPORT,
+                isSelected = selectedCategory == CategoryModel.TRANSPORT,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Segunda fila (ENTERTAINMENT, SHOPPING)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CategoryChip(
+                category = CategoryModel.ENTERTAINMENT,
+                isSelected = selectedCategory == CategoryModel.ENTERTAINMENT,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+            CategoryChip(
+                category = CategoryModel.SHOPPING,
+                isSelected = selectedCategory == CategoryModel.SHOPPING,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Tercera fila (BILLS, HEALTH)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CategoryChip(
+                category = CategoryModel.BILLS,
+                isSelected = selectedCategory == CategoryModel.BILLS,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+            CategoryChip(
+                category = CategoryModel.HEALTH,
+                isSelected = selectedCategory == CategoryModel.HEALTH,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Cuarta fila (OTHER)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CategoryChip(
+                category = CategoryModel.OTHER,
+                isSelected = selectedCategory == CategoryModel.OTHER,
+                onSelected = onCategorySelected,
+                modifier = Modifier.weight(1f)
+            )
+            // Espacio vacío para mantener el layout
+            Box(modifier = Modifier.weight(1f))
         }
     }
 }
 
-// Extension properties (igual que en HomeScreen)
+@Composable
+private fun CategoryChip(
+    category: CategoryModel,
+    isSelected: Boolean,
+    onSelected: (CategoryModel) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilterChip(
+        selected = isSelected,
+        onClick = { onSelected(category) },
+        label = { Text(category.name) },
+        leadingIcon = {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(category.color.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = category.emoji,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        },
+        modifier = modifier
+    )
+}
+
+// Extension properties
 private val CategoryModel.emoji: String
     get() = when (this) {
         CategoryModel.FOOD -> "🍔"

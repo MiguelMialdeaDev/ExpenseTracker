@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.miguelmialdea.expensetracker.navigation.ExpenseTrackerNavGraph
 import com.miguelmialdea.expensetracker.ui.theme.ExpenseTrackerTheme
-import screen.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,10 +22,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(
-                        onNavigateToAdd = { },
-                        onExpenseClick = { }
-                    )
+                    val navController = rememberNavController()
+                    ExpenseTrackerNavGraph(navController = navController)
                 }
             }
         }
