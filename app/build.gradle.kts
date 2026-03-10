@@ -30,16 +30,30 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation(project(":feature:add:domain"))
+    implementation(project(":feature:add:ui"))
+    implementation(project(":feature:dashboard:domain"))
+    implementation(project(":feature:dashboard:ui"))
+    implementation(project(":feature:filter:domain"))
+    implementation(project(":feature:filter:ui"))
+    implementation(project(":feature:home:domain"))
+    implementation(project(":feature:home:ui"))
+    implementation(project(":core:data"))
+
+    // Desugaring
+    coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -49,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.koin.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

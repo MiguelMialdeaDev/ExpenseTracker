@@ -1,0 +1,6 @@
+package di
+
+import org.koin.dsl.module
+
+val homeUiModule = module {
+}
