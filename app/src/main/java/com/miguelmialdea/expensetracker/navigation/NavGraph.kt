@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import screen.AddExpenseScreen
+import screen.DashboardScreen
 import screen.HomeScreen
 
 @Composable
@@ -27,6 +28,11 @@ fun ExpenseTrackerNavGraph(
                     navController.navigate(Screen.AddExpense.createRoute(expenseId))
                 }
             )
+        }
+
+        // Dashboard Screen
+        composable(route = Screen.Dashboard.route) {
+            DashboardScreen()
         }
 
         // Add/Edit Expense Screen

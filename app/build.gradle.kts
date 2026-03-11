@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":feature:home:domain"))
     implementation(project(":feature:home:ui"))
     implementation(project(":core:data"))
+    implementation(project(":core:ui"))
 
     // Desugaring
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
