@@ -39,6 +39,9 @@ import viewmodel.DashboardViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
+private const val PERCENTAGE_MULTIPLIER = 100
+private const val GREEN_COLOR = 0xFF4CAF50
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -168,7 +171,7 @@ private fun StatsCard(stats: ExpenseStats) {
             // Comparison with last month
             if (stats.totalLastMonth > 0) {
                 val difference = stats.totalThisMonth - stats.totalLastMonth
-                val percentageChange = ((difference / stats.totalLastMonth) * 100).toInt()
+                val percentageChange = ((difference / stats.totalLastMonth) * PERCENTAGE_MULTIPLIER).toInt()
                 val isIncrease = difference > 0
 
                 Text(
@@ -181,7 +184,7 @@ private fun StatsCard(stats: ExpenseStats) {
                     color = if (isIncrease) {
                         MaterialTheme.colorScheme.error
                     } else {
-                        Color(0xFF4CAF50)
+                        Color(GREEN_COLOR)
                     }
                 )
             }

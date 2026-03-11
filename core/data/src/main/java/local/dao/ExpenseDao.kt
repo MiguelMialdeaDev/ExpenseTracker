@@ -25,7 +25,9 @@ interface ExpenseDao {
     @Query("DELETE FROM expenses WHERE id = :id")
     suspend fun deleteExpense(id: Long)
 
-    @Query("SELECT * FROM expenses WHERE dateMillis >= :startMillis AND dateMillis <= :endMillis ORDER BY dateMillis DESC")
+    @Query(
+        "SELECT * FROM expenses WHERE dateMillis >= :startMillis AND dateMillis <= :endMillis ORDER BY dateMillis DESC"
+    )
     fun getExpensesByDateRange(startMillis: Long, endMillis: Long): Flow<List<ExpenseEntity>>
 
     @Query("SELECT SUM(amount) FROM expenses WHERE dateMillis >= :startMillis AND dateMillis <= :endMillis")

@@ -4,17 +4,26 @@ import model.ExpenseStats
 import repository.ExpenseRepository
 import java.time.LocalDateTime
 
+private const val FIRST_DAY_OF_MONTH = 1
+private const val ONE_MONTH = 1L
+private const val ONE_DAY = 1L
+private const val END_HOUR = 23
+private const val END_MINUTE = 59
+private const val END_SECOND = 59
+
 class GetExpenseStatsUseCase(
     private val repository: ExpenseRepository
 ) {
     suspend operator fun invoke(): ExpenseStats {
         val now = LocalDateTime.now()
-        val startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
+        val startOfMonth = now.withDayOfMonth(FIRST_DAY_OF_MONTH).withHour(0).withMinute(0).withSecond(0)
         val endOfMonth = now.withDayOfMonth(now.toLocalDate().lengthOfMonth())
-            .withHour(23).withMinute(59).withSecond(59)
+            .withHour(END_HOUR).withMinute(END_MINUTE).withSecond(END_SECOND)
 
-        val lastMonthStart = startOfMonth.minusMonths(1)
-        val lastMonthEnd = startOfMonth.minusDays(1).withHour(23).withMinute(59).withSecond(59)
+        val lastMonthStart = startOfMonth.minusMonths(ONE_MONTH)
+        val lastMonthEnd = startOfMonth.minusDays(
+            ONE_DAY
+        ).withHour(END_HOUR).withMinute(END_MINUTE).withSecond(END_SECOND)
 
         val totalThisMonth = repository.getTotalByDateRange(startOfMonth, endOfMonth)
         val totalLastMonth = repository.getTotalByDateRange(lastMonthStart, lastMonthEnd)

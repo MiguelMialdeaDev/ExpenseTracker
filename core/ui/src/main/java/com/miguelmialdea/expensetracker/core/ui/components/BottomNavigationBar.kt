@@ -1,20 +1,15 @@
 package com.miguelmialdea.expensetracker.core.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-
-data class BottomNavItem(
-    val route: String,
-    val label: String,
-    val icon: ImageVector
-)
+import com.miguelmialdea.expensetracker.core.ui.items.BottomNavItem
 
 @Composable
 fun BottomNavigationBar(
@@ -50,7 +45,12 @@ fun getBottomNavItems(): List<BottomNavItem> {
         BottomNavItem(
             route = "dashboard",
             label = "Dashboard",
-            icon = Icons.Default.List
+            icon = Icons.AutoMirrored.Filled.List
+        ),
+        BottomNavItem(
+            route = "filter",
+            label = "Filter",
+            icon = Icons.Default.Search
         )
     )
 }

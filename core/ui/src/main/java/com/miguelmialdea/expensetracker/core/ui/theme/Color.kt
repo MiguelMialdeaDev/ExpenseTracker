@@ -1,4 +1,4 @@
-package theme
+package com.miguelmialdea.expensetracker.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

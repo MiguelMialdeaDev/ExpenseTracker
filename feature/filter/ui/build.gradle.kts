@@ -23,6 +23,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -37,6 +38,11 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
 
+    // Desugaring
+    coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 }
