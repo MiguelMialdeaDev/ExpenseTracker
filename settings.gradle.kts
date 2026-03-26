@@ -40,3 +40,6 @@ include(":feature:dashboard:ui")
 
 include(":feature:filter:domain")
 include(":feature:filter:ui")
+
+include(":feature:budget:domain")
+include(":feature:budget:ui")

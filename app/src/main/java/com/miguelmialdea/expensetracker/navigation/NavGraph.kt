@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import screen.AddExpenseScreen
+import screen.BudgetScreen
 import screen.DashboardScreen
 import screen.FilterScreen
 import screen.HomeScreen
@@ -34,6 +35,11 @@ fun ExpenseTrackerNavGraph(
         // Dashboard Screen
         composable(route = Screen.Dashboard.route) {
             DashboardScreen()
+        }
+
+        // Budget Screen
+        composable(route = Screen.Budget.route) {
+            BudgetScreen()
         }
 
         // Filter Screen

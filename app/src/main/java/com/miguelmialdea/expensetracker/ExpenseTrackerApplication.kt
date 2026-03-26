@@ -3,6 +3,8 @@ package com.miguelmialdea.expensetracker
 import android.app.Application
 import di.addDomainModule
 import di.addUiModule
+import di.budgetDomainModule
+import di.budgetUiModule
 import di.dashboardDomainModule
 import di.dashboardUiModule
 import di.dataModule
@@ -30,6 +32,10 @@ class ExpenseTrackerApplication : Application() {
                 // Feature add
                 addDomainModule,
                 addUiModule,
+
+                // Feature budget
+                budgetDomainModule,
+                budgetUiModule,
 
                 // Feature dashboard
                 dashboardDomainModule,

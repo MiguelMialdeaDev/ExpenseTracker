@@ -25,6 +25,11 @@ class AddExpenseViewModel(
 
     private var currentExpenseId: Long = 0
 
+    companion object {
+        private const val MAX_AMOUNT = 999999.99
+        private const val MAX_DESCRIPTION_LENGTH = 200
+    }
+
     @Suppress("TooGenericExceptionCaught")
     fun loadExpense(id: Long?) {
         if (id == null || id == 0L) return
@@ -66,11 +71,19 @@ class AddExpenseViewModel(
 
     fun onAmountChange(amount: String) {
         // Solo permitir números y un punto decimal
-        if (amount.isEmpty() || amount.matches(Regex("^\\d*\\.?\\d*$"))) {
+        if (amount.isEmpty() || amount.matches(Regex("^\\d*\\.?\\d{0,2}$"))) {
+            val amountDouble = amount.toDoubleOrNull()
+            val error = when {
+                amount.isEmpty() -> null
+                amountDouble == null -> "Invalid amount"
+                amountDouble > MAX_AMOUNT -> "Amount cannot exceed $${MAX_AMOUNT}"
+                else -> null
+            }
+
             _uiState.update {
                 it.copy(
                     amount = amount,
-                    amountError = null
+                    amountError = error
                 )
             }
         }
@@ -81,7 +94,15 @@ class AddExpenseViewModel(
     }
 
     fun onDescriptionChange(description: String) {
-        _uiState.update { it.copy(description = description) }
+        // Limit description length
+        if (description.length <= MAX_DESCRIPTION_LENGTH) {
+            _uiState.update {
+                it.copy(
+                    description = description,
+                    descriptionError = null
+                )
+            }
+        }
     }
 
     fun onDateChange(date: LocalDateTime) {
@@ -130,26 +151,35 @@ class AddExpenseViewModel(
 
     private fun validateForm(): Boolean {
         val amount = _uiState.value.amount
+        val description = _uiState.value.description.trim()
+        var isValid = true
 
-        // Validar que no esté vacío
-        if (amount.isEmpty()) {
-            _uiState.update { it.copy(amountError = "Amount is required") }
-            return false
+        // Validar amount
+        when {
+            amount.isEmpty() -> {
+                _uiState.update { it.copy(amountError = "Amount is required") }
+                isValid = false
+            }
+            amount.toDoubleOrNull() == null -> {
+                _uiState.update { it.copy(amountError = "Invalid amount") }
+                isValid = false
+            }
+            amount.toDouble() <= 0 -> {
+                _uiState.update { it.copy(amountError = "Amount must be greater than 0") }
+                isValid = false
+            }
+            amount.toDouble() > MAX_AMOUNT -> {
+                _uiState.update { it.copy(amountError = "Amount cannot exceed $${MAX_AMOUNT}") }
+                isValid = false
+            }
         }
 
-        // Validar que sea un número válido
-        val amountDouble = amount.toDoubleOrNull()
-        if (amountDouble == null) {
-            _uiState.update { it.copy(amountError = "Invalid amount") }
-            return false
+        // Validar description
+        if (description.isEmpty()) {
+            // Auto-fill with default description instead of showing error
+            _uiState.update { it.copy(description = "No description") }
         }
 
-        // Validar que sea mayor que 0
-        if (amountDouble <= 0) {
-            _uiState.update { it.copy(amountError = "Amount must be greater than 0") }
-            return false
-        }
-
-        return true
+        return isValid
     }
 }

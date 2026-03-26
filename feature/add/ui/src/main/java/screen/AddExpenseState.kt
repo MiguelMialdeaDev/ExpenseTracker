@@ -8,6 +8,7 @@ data class AddExpenseState(
     val amountError: String? = null,
     val category: CategoryModel = CategoryModel.FOOD,
     val description: String = "",
+    val descriptionError: String? = null,
     val date: LocalDateTime = LocalDateTime.now(),
     val isEditMode: Boolean = false,
     val isLoading: Boolean = false,

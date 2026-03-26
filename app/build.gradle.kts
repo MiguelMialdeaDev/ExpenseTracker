@@ -44,6 +44,8 @@ android {
 dependencies {
     implementation(project(":feature:add:domain"))
     implementation(project(":feature:add:ui"))
+    implementation(project(":feature:budget:domain"))
+    implementation(project(":feature:budget:ui"))
     implementation(project(":feature:dashboard:domain"))
     implementation(project(":feature:dashboard:ui"))
     implementation(project(":feature:filter:domain"))
