@@ -4,7 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -51,7 +51,7 @@ fun getBottomNavItems(): List<BottomNavItem> {
         BottomNavItem(
             route = "budget",
             label = "Budget",
-            icon = Icons.Filled.Star
+            icon = Icons.Filled.ShoppingCart
         ),
         BottomNavItem(
             route = "filter",
