@@ -43,6 +43,18 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
+    // Charts
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+
     // Desugaring
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.koin.test.junit4)
 }

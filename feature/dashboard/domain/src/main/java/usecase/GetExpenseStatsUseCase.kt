@@ -45,12 +45,17 @@ class GetExpenseStatsUseCase(
             .maxByOrNull { it.value.size }
             ?.key
 
+        val highestExpense = thisMonthExpenses.maxOfOrNull { it.amount }
+        val lowestExpense = thisMonthExpenses.minOfOrNull { it.amount }
+
         return ExpenseStats(
             totalThisMonth = totalThisMonth,
             totalLastMonth = totalLastMonth,
             averagePerDay = averagePerDay,
             expenseCount = thisMonthExpenses.size,
-            mostUsedCategory = mostUsedCategory
+            mostUsedCategory = mostUsedCategory,
+            highestExpense = highestExpense,
+            lowestExpense = lowestExpense
         )
     }
 }

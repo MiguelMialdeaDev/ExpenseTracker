@@ -7,21 +7,30 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import kotlinx.coroutines.launch
 import model.CategoryExpense
 import model.ExpenseStats
 import models.CategoryModel
@@ -48,13 +65,41 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Dashboard") }
+                title = { Text("Dashboard") },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    val csvContent = viewModel.exportToCsv()
+                                    if (csvContent.isEmpty()) {
+                                        snackbarHostState.showSnackbar("No expenses to export")
+                                    } else {
+                                        // TODO: Share CSV file using Android's share intent
+                                        // For now, just show success message
+                                        snackbarHostState.showSnackbar("CSV generated (${csvContent.lines().size - 1} expenses)")
+                                    }
+                                } catch (e: Exception) {
+                                    snackbarHostState.showSnackbar("Error exporting: ${e.message}")
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Export to CSV"
+                        )
+                    }
+                }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -105,6 +150,34 @@ private fun DashboardContent(
         // Stats Cards
         item {
             StatsCard(stats = stats)
+        }
+
+        // Quick Stats Row
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                QuickStatCard(
+                    label = "Highest",
+                    value = formatCurrency(stats.highestExpense ?: 0.0),
+                    emoji = "📈",
+                    modifier = Modifier.weight(1f)
+                )
+                QuickStatCard(
+                    label = "Lowest",
+                    value = formatCurrency(stats.lowestExpense ?: 0.0),
+                    emoji = "📉",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // Category Chart
+        if (categoryExpenses.isNotEmpty()) {
+            item {
+                CategoryChart(categoryExpenses = categoryExpenses)
+            }
         }
 
         // Category Breakdown Title
@@ -223,6 +296,128 @@ private fun StatItem(
             fontWeight = FontWeight.Bold,
             color = color
         )
+    }
+}
+
+@Composable
+private fun QuickStatCard(
+    label: String,
+    value: String,
+    emoji: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = emoji,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryChart(categoryExpenses: List<CategoryExpense>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Spending Distribution",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (categoryExpenses.isNotEmpty()) {
+                val modelProducer = remember { CartesianChartModelProducer.build() }
+
+                // Prepare data for chart
+                val chartData = categoryExpenses.map { it.total.toFloat() }
+                modelProducer.tryRunTransaction {
+                    columnSeries {
+                        series(chartData)
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                ) {
+                    CartesianChartHost(
+                        chart = rememberCartesianChart(
+                            rememberColumnCartesianLayer(),
+                            startAxis = rememberStartAxis(),
+                            bottomAxis = rememberBottomAxis()
+                        ),
+                        modelProducer = modelProducer
+                    )
+                }
+
+                // Legend
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categoryExpenses.forEach { categoryExpense ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .background(
+                                            color = categoryExpense.category.color,
+                                            shape = CircleShape
+                                        )
+                                )
+                                Text(
+                                    text = "${categoryExpense.category.emoji} ${categoryExpense.category.name}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            Text(
+                                text = formatCurrency(categoryExpense.total),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

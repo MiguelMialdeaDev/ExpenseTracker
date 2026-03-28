@@ -6,12 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import usecase.ExportExpensesToCsvUseCase
 import usecase.GetExpenseStatsUseCase
 import usecase.GetExpensesByCategoryUseCase
 
 class DashboardViewModel(
     private val getExpenseStatsUseCase: GetExpenseStatsUseCase,
-    private val getExpensesByCategoryUseCase: GetExpensesByCategoryUseCase
+    private val getExpensesByCategoryUseCase: GetExpensesByCategoryUseCase,
+    private val exportExpensesToCsvUseCase: ExportExpensesToCsvUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DashboardState>(DashboardState.Loading)
@@ -47,5 +49,9 @@ class DashboardViewModel(
 
     fun refresh() {
         loadDashboard()
+    }
+
+    suspend fun exportToCsv(): String {
+        return exportExpensesToCsvUseCase()
     }
 }

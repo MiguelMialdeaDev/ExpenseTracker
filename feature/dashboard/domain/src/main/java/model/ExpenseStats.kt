@@ -7,5 +7,7 @@ data class ExpenseStats(
     val totalLastMonth: Double,
     val averagePerDay: Double,
     val expenseCount: Int,
-    val mostUsedCategory: CategoryModel?
+    val mostUsedCategory: CategoryModel?,
+    val highestExpense: Double?,
+    val lowestExpense: Double?
 )

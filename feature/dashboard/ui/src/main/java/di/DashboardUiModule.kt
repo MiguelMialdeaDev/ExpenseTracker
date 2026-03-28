@@ -5,5 +5,5 @@ import org.koin.dsl.module
 import viewmodel.DashboardViewModel
 
 val dashboardUiModule = module {
-    viewModel { DashboardViewModel(get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get()) }
 }
